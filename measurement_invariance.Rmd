@@ -1,0 +1,14 @@
+---
+title: "big6genderMI"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load data}
+
+tend_comb <- import(here("aggregated_data.Rdata"))
+```
+
