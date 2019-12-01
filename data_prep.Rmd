@@ -51,5 +51,9 @@ agg_comb <- comb3 %>%
 
 #Transform to have tendencies as columns
 tend_comb <- spread(agg_comb, tendency, mean)
+
+# save
+save(tend_comb, file = here(paste0("/aggregated_data.Rdata")))
+
 ```
 
