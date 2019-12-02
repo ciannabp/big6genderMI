@@ -10,50 +10,107 @@ library(rio)
 
 knitr::opts_chunk$set(echo = TRUE)
 
-
 ```
 
 ```{r load data}
 
-data <- import(here("SetC_imputed.xlsx"))
+data_b <- import(here("Set_B_Cleaned.xlsx"))
+data_c <- import(here("SetC_imputed.xlsx"))
 ```
 
-```{r reverse code}
+```{r c prep}
 #gather so columns are adjectives
-comb2 <- gather(data, situation , value, 4:618) %>% 
+comb2_c <- gather(data_c, situation , value, 4:618) %>% 
   separate("situation", c("situation" , "tendency"), sep="_") %>% 
   spread(tendency, value, fill= "")
 
 #convert columns to numeric
 x <- 5:19
-comb2[x] <- lapply(comb2[x], as.numeric)
-str(comb2)
+comb2_c[x] <- lapply(comb2_c[x], as.numeric)
+str(comb2_c)
 
 #Reverse code for aggregation into the big 6
-comb2[,c(5,6,8,9,12,15,18,19)]<- 6-comb2[,c(5,6,8,9,12,15,18,19)]
+comb2_c[,c(5,6,8,9,12,15,18,19)]<- 6-comb2_c[,c(5,6,8,9,12,15,18,19)]
 
 #Add R to reverse coded variables 
-names(comb2)[5:19] = c("aloof_R", "fault_R", "kind", "lazy_R", "noart_R", "original", "outgoing", "quiet_R", "reflect", "relaxed", "risks_R", "rules", "thorough", "use_R",  "worry_R")
+names(comb2_c)[5:19] = c("aloof_R", "fault_R", "kind", "lazy_R", "noart_R", "original", "outgoing", "quiet_R", "reflect", "relaxed", "risks_R", "rules", "thorough", "use_R",  "worry_R")
 
 #Transform to have situations as columns
-comb3 <- gather(comb2, tendency , value, 5:19) %>% 
+comb3_c <- gather(comb2_c, tendency , value, 5:19) %>% 
   spread(situation, value, fill= "")
 
 #convert columns to numeric
 x <- 5:45
-comb3[x] <- lapply(comb3[x], as.numeric)
-str(comb3)
+comb3_c[x] <- lapply(comb3_c[x], as.numeric)
+str(comb3_c)
 
 #Aggregate by tendency
-agg_comb <- comb3 %>% 
-  mutate(mean = rowMeans(comb3[,5:45])) %>% 
+agg_comb_c <- comb3_c %>% 
+  mutate(mean = rowMeans(comb3_c[,5:45])) %>% 
   select(ID, Gender, tendency, mean)
 
 #Transform to have tendencies as columns
-tend_comb <- spread(agg_comb, tendency, mean)
+tend_comb_c <- spread(agg_comb_c, tendency, mean)
 
-# save
-save(tend_comb, file = here(paste0("/aggregated_data.Rdata")))
+#remove gender 3
+big6_c <- tend_comb_c %>% 
+  filter(Gender < 3)
 
 ```
+
+```{r b prep}
+#gather so columns are adjectives
+comb2_b <- gather(data_b, situation , value, 3:617) %>% 
+  separate("situation", c("situation" , "tendency"), sep="_") %>% 
+  spread(tendency, value, fill= "") %>% 
+  select(-3:-11)
+
+#convert columns to numeric
+x <- 4:18
+comb2_b[x] <- lapply(comb2_b[x], as.numeric)
+str(comb2_b)
+
+#Reverse code for aggregation into the big 6
+comb2_b[,c(4,5,7,8,11,13,16,18)]<- 6-comb2_b[,c(4,5,7,8,11,13,16,18)]
+
+#Add R to reverse coded variables 
+names(comb2_b)[1:18] = c("ID", "Gender", "situation", "aloof_R", "fault_R", "kind", "lazy_R", "noart_R", "original", "outgoing", "quiet_R","relaxed", "risks_R", "rules", "thorough", "use_R", "reflect", "worry_R")
+
+#Transform to have situations as columns
+comb3_b <- gather(comb2_b, tendency , value, 4:18) %>% 
+  spread(situation, value, fill= "")
+
+#convert columns to numeric
+x <- 4:44
+comb3_b[x] <- lapply(comb3_b[x], as.numeric)
+str(comb3_b)
+
+#Aggregate by tendency
+agg_comb_b <- comb3_b %>% 
+  mutate(mean = rowMeans(comb3_b[,4:44])) %>% 
+  select(ID, Gender, tendency, mean)
+
+#Transform to have tendencies as columns
+tend_comb_b <- spread(agg_comb_b, tendency, mean)
+
+#remove gender 3
+big6_b <- tend_comb_b %>% 
+  filter(Gender < 3) 
+
+big6_b$Gender = as.numeric(big6_b$Gender)
+big6_b$ID = as.character(big6_b$ID)
+```
+
+
+```{r combine and save}
+
+#join 
+big6 <- full_join(big6_c, big6_b) 
+
+# save
+save(big6, file = here(paste0("/aggregated_data.Rdata")))
+
+
+```
+
 

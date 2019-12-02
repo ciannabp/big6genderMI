@@ -4,11 +4,59 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+
+library(tidyverse)
+library(lavaan)
+library(semPlot)
+
+
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r load data}
 
-tend_comb <- import(here("aggregated_data.Rdata"))
+big6 <- import(here("aggregated_data.Rdata"))
+```
+
+```{r big 6 cfa}
+
+#test big6 CFA
+big6_cfa<- '
+  open =~ original + noart_R + reflect
+  consc =~ lazy_R + thorough
+  extra =~ outgoing + quiet_R
+  agree =~ aloof_R + kind + fault_R
+  neur =~ relaxed + worry_R
+  hp =~ risks_R + rules + use_R
+'
+  
+  big6_cfa_fitted <- cfa(big6_cfa,
+               meanstructure = TRUE,
+               data = big6
+ )
+
+summary(big6_cfa_fitted, standardized = TRUE, fit.measures = TRUE, rsquare = TRUE)
+semPaths(big6_cfa_fitted)
+
+
+```
+```{r configural invariance}
+#test big6 CFA
+configural<- '
+  open =~ original + noart_R + reflect
+  consc =~ lazy_R + thorough
+  extra =~ outgoing + quiet_R
+  agree =~ aloof_R + kind + fault_R
+  neur =~ relaxed + worry_R
+  hp =~ risks_R + rules + use_R
+'
+  
+  configural_fitted <- cfa(configural,
+               meanstructure = TRUE,
+               data = big6,
+               group = "Gender"
+ )
+
+summary(configural_fitted, standardized = TRUE, fit.measures = TRUE, rsquare = TRUE)
 ```
 
