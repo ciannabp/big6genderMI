@@ -108,7 +108,7 @@ big6_b$ID = as.character(big6_b$ID)
 big6 <- full_join(big6_c, big6_b) 
 
 # save
-save(big6, file = here(paste0("/aggregated_data.Rdata")))
+save(big6, file = here("aggregated_data.Rdata"))
 
 
 ```

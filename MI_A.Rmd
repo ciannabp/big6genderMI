@@ -1,0 +1,105 @@
+---
+title: "big6genderMI"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(lavaan)
+library(semPlot)
+library(rio)
+library(here)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load data}
+
+big6 <- import(here("aggregated_data.Rdata"))
+```
+
+```{r agreeableness}
+
+#test big6 CFA
+agree_cfa<- '
+  agree =~ aloof_R + kind + fault_R
+'
+  
+  agree_cfa_fitted <- cfa(agree_cfa,
+               data = big6
+ )
+
+summary(agree_cfa_fitted, standardized = TRUE, fit.measures = TRUE, rsquare = TRUE)
+semPaths(agree_cfa_fitted)
+```
+
+```{r agreeableness configural}
+#test big6 CFA
+configural_a<- '
+  agree =~ aloof_R + kind + fault_R
+'
+  
+  configural_fitted_a <- cfa(configural_a,
+               data = big6,
+               group = "Gender"
+ )
+
+summary(configural_fitted_a, standardized = TRUE)
+```
+
+```{r agreeableness metric}
+#test big6 CFA
+metric_fitted_a <- cfa(configural_a,
+               group.equal = "loadings",
+               data = big6,
+               group = "Gender"
+ )
+
+summary(metric_fitted_a, standardized = TRUE)
+
+#do we do this at that stage? At 1 for configural
+fitmeasures(configural_fitted_a, c("cfi", "mfi"))
+fitmeasures(metric_fitted_a, c("cfi", "mfi"))
+
+
+```
+
+```{r agreeableness strong}
+#test big6 CFA
+ strong_fitted_a <- cfa(configural_a,
+               group.equal = c("loadings", "intercepts"),
+               data = big6,
+               group = "Gender"
+ )
+
+summary(strong_fitted_a, standardized = TRUE)
+
+fitmeasures(metric_fitted_a, c("cfi", "mfi"))
+fitmeasures(strong_fitted_a, c("cfi", "mfi"))
+
+modindices(strong_fitted_a)
+lavTestScore(strong_fitted_a)
+
+anova(strong_fitted_a, metric_fitted_a, configural_fitted_a)
+
+
+```
+
+```{r agreeableness strict}
+strict_fitted_a <- cfa(configural_a,
+               group.equal = c("loadings", "intercepts", "residuals"),
+               data = big6,
+               group = "Gender"
+ )
+
+summary(strict_fitted_a, standardized = T)
+
+fitmeasures(strong_fitted_a, c("cfi", "mfi"))
+fitmeasures(strict_fitted_a, c("cfi", "mfi"))
+
+lavTestScore(strict_fitted_a)
+
+anova(strict_fitted_a, strong_fitted_a, metric_fitted_a, configural_fitted_a)
+```
+

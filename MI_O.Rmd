@@ -1,0 +1,91 @@
+---
+title: "MI_O"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(lavaan)
+library(semPlot)
+library(rio)
+library(here)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load data}
+
+big6_c <- import(here("aggregated_data.Rdata"))
+```
+
+```{r o configural}
+#test big6 CFA
+configural_o<- '
+  open =~ original + noart_R + reflect
+'
+  
+  configural_fitted_o <- cfa(configural_o,
+               data = big6_c,
+               group = "Gender"
+ )
+
+summary(configural_fitted_o, standardized = TRUE)
+```
+
+```{r o metric}
+#test big6 CFA
+metric_fitted_o <- cfa(configural_o,
+               group.equal = "loadings",
+               data = big6,
+               group = "Gender"
+ )
+
+summary(metric_fitted_o, standardized = TRUE)
+
+#do we do this at that stage? At 1 for configural
+fitmeasures(configural_fitted_o, c("cfi", "mfi"))
+fitmeasures(metric_fitted_o, c("cfi", "mfi"))
+
+modindices(metric_fitted_o)
+lavTestScore(metric_fitted_o)
+
+
+```
+
+```{r o strong}
+#test big6 CFA
+ strong_fitted_o <- cfa(configural_o,
+               group.equal = c("loadings", "intercepts"),
+               data = big6,
+               group = "Gender"
+ )
+
+summary(strong_fitted_o, standardized = TRUE)
+
+fitmeasures(metric_fitted_o, c("cfi", "mfi"))
+fitmeasures(strong_fitted_o, c("cfi", "mfi"))
+
+modindices(strong_fitted_o)
+lavTestScore(strong_fitted_o)
+
+anova(strong_fitted_o, metric_fitted_o, configural_fitted_o)
+
+```
+
+```{r o strict}
+strict_fitted_o <- cfa(configural_o,
+               group.equal = c("loadings", "intercepts", "residuals"),
+               data = big6,
+               group = "Gender"
+ )
+
+summary(strict_fitted_o, standardized = T)
+
+fitmeasures(strong_fitted_o, c("cfi", "mfi"))
+fitmeasures(strict_fitted_o, c("cfi", "mfi"))
+
+lavTestScore(strict_fitted_o)
+
+anova(strict_fitted_o, strong_fitted_o, metric_fitted_o, configural_fitted_o)
+```

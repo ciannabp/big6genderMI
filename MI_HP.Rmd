@@ -1,0 +1,91 @@
+---
+title: "big6genderMI"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(lavaan)
+library(semPlot)
+library(rio)
+library(here)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load data}
+
+big6 <- import(here("aggregated_data.Rdata"))
+```
+
+```{r hp configural}
+#test big6 CFA
+configural_hp<- '
+  hp =~ risks_R + rules + use_R
+'
+  
+  configural_fitted_hp <- cfa(configural_hp,
+               data = big6,
+               group = "Gender"
+ )
+
+summary(configural_fitted_hp, standardized = TRUE)
+```
+
+```{r hp metric}
+#test big6 CFA
+metric_fitted_hp <- cfa(configural_hp,
+               group.equal = "loadings",
+               data = big6,
+               group = "Gender"
+ )
+
+summary(metric_fitted_hp, standardized = TRUE)
+
+#do we do this at that stage? At 1 for configural
+fitmeasures(configural_fitted_hp, c("cfi", "mfi"))
+fitmeasures(metric_fitted_hp, c("cfi", "mfi"))
+
+modindices(metric_fitted_hp)
+lavTestScore(metric_fitted_hp)
+
+
+```
+
+```{r hp strong}
+#test big6 CFA
+ strong_fitted_hp <- cfa(configural_hp,
+               group.equal = c("loadings", "intercepts"),
+               data = big6,
+               group = "Gender"
+ )
+
+summary(strong_fitted_hp, standardized = TRUE)
+
+fitmeasures(metric_fitted_hp, c("cfi", "mfi"))
+fitmeasures(strong_fitted_hp, c("cfi", "mfi"))
+
+modindices(strong_fitted_hp)
+lavTestScore(strong_fitted_hp)
+
+anova(strong_fitted_hp, metric_fitted_hp, configural_fitted_hp)
+
+```
+
+```{r hp strict}
+strict_fitted_hp <- cfa(configural_hp,
+               group.equal = c("loadings", "intercepts", "residuals"),
+               data = big6,
+               group = "Gender"
+ )
+
+summary(strict_fitted_hp, standardized = T)
+
+fitmeasures(strong_fitted_hp, c("cfi", "mfi"))
+fitmeasures(strict_fitted_hp, c("cfi", "mfi"))
+
+lavTestScore(strict_fitted_hp)
+
+anova(strict_fitted_hp, strong_fitted_hp, metric_fitted_hp, configural_fitted_hp)
+```
