@@ -57,7 +57,7 @@ lavTestScore(metric_fitted_o)
 #test big6 CFA
  strong_fitted_o <- cfa(configural_o,
                group.equal = c("loadings", "intercepts"),
-               data = big6,
+               data = big6_c,
                group = "Gender"
  )
 
@@ -76,7 +76,7 @@ anova(strong_fitted_o, metric_fitted_o, configural_fitted_o)
 ```{r o strict}
 strict_fitted_o <- cfa(configural_o,
                group.equal = c("loadings", "intercepts", "residuals"),
-               data = big6,
+               data = big6_c,
                group = "Gender"
  )
 
