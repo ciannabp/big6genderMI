@@ -1,5 +1,5 @@
 ---
-title: "MI_O"
+title: "MI of Openness Across Gender"
 output: html_document
 ---
 
@@ -11,39 +11,38 @@ library(semPlot)
 library(rio)
 library(here)
 
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
 
 ```{r load data}
 
-big6_c <- import(here("aggregated_data.Rdata"))
+big6 <- import(here("aggregated_data.Rdata"))
 ```
 
 ```{r o configural}
-#test big6 CFA
+# Configural Invariance 
 configural_o<- '
   open =~ original + noart_R + reflect
 '
   
   configural_fitted_o <- cfa(configural_o,
-               data = big6_c,
+               data = big6,
                group = "Gender"
  )
 
-summary(configural_fitted_o, standardized = TRUE)
+summary(configural_fitted_o, fit.measures = TRUE, standardized = TRUE)
 ```
 
 ```{r o metric}
-#test big6 CFA
+# Metric Invariance 
 metric_fitted_o <- cfa(configural_o,
                group.equal = "loadings",
                data = big6,
                group = "Gender"
  )
 
-summary(metric_fitted_o, standardized = TRUE)
+summary(metric_fitted_o, fit.measures = TRUE, standardized = TRUE)
 
-#do we do this at that stage? At 1 for configural
 fitmeasures(configural_fitted_o, c("cfi", "mfi"))
 fitmeasures(metric_fitted_o, c("cfi", "mfi"))
 
@@ -54,14 +53,14 @@ lavTestScore(metric_fitted_o)
 ```
 
 ```{r o strong}
-#test big6 CFA
+# Strong Invariance 
  strong_fitted_o <- cfa(configural_o,
                group.equal = c("loadings", "intercepts"),
-               data = big6_c,
+               data = big6,
                group = "Gender"
  )
 
-summary(strong_fitted_o, standardized = TRUE)
+summary(strong_fitted_o, fit.measures = TRUE, standardized = TRUE)
 
 fitmeasures(metric_fitted_o, c("cfi", "mfi"))
 fitmeasures(strong_fitted_o, c("cfi", "mfi"))
@@ -69,23 +68,35 @@ fitmeasures(strong_fitted_o, c("cfi", "mfi"))
 modindices(strong_fitted_o)
 lavTestScore(strong_fitted_o)
 
-anova(strong_fitted_o, metric_fitted_o, configural_fitted_o)
+```
+```{r o strong partial}
+# Strong Partial Invariance 
+ strong_fitted_p_o <- cfa(configural_o,
+               group.equal = c("loadings", "intercepts"),
+               group.partial = c("noart_R ~ 1"),
+               data = big6,
+               group = "Gender"
+ )
+
+summary(strong_fitted_p_o, fit.measures = TRUE, standardized = TRUE)
+
+fitmeasures(strong_fitted_o, c("cfi", "mfi"))
+fitmeasures(strong_fitted_p_o, c("cfi", "mfi"))
 
 ```
 
 ```{r o strict}
-strict_fitted_o <- cfa(configural_o,
+# Strict Partial Invariance 
+strict_fitted_p_o <- cfa(configural_o,
                group.equal = c("loadings", "intercepts", "residuals"),
-               data = big6_c,
+               group.partial = c("noart_R ~ 1", "noart_R ~~ noart_R"),
+               data = big6,
                group = "Gender"
  )
 
-summary(strict_fitted_o, standardized = T)
+summary(strict_fitted_p_o, fit.measures = TRUE, standardized = T)
 
-fitmeasures(strong_fitted_o, c("cfi", "mfi"))
-fitmeasures(strict_fitted_o, c("cfi", "mfi"))
+fitmeasures(strict_fitted_p_o, c("cfi", "mfi"))
+fitmeasures(strict_fitted_p_o, c("cfi", "mfi"))
 
-lavTestScore(strict_fitted_o)
-
-anova(strict_fitted_o, strong_fitted_o, metric_fitted_o, configural_fitted_o)
 ```

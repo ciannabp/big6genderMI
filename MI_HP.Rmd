@@ -1,5 +1,5 @@
 ---
-title: "big6genderMI"
+title: "MI of Honesty/Propriety Across Gender"
 output: html_document
 ---
 
@@ -20,7 +20,7 @@ big6 <- import(here("aggregated_data.Rdata"))
 ```
 
 ```{r hp configural}
-#test big6 CFA
+# Configural Invariance 
 configural_hp<- '
   hp =~ risks_R + rules + use_R
 '
@@ -30,20 +30,19 @@ configural_hp<- '
                group = "Gender"
  )
 
-summary(configural_fitted_hp, standardized = TRUE)
+summary(configural_fitted_hp, fit.measures = TRUE, standardized = TRUE)
 ```
 
 ```{r hp metric}
-#test big6 CFA
+# Metric Invariance 
 metric_fitted_hp <- cfa(configural_hp,
                group.equal = "loadings",
                data = big6,
                group = "Gender"
  )
 
-summary(metric_fitted_hp, standardized = TRUE)
+summary(metric_fitted_hp, fit.measures = TRUE, standardized = TRUE)
 
-#do we do this at that stage? At 1 for configural
 fitmeasures(configural_fitted_hp, c("cfi", "mfi"))
 fitmeasures(metric_fitted_hp, c("cfi", "mfi"))
 
@@ -54,14 +53,14 @@ lavTestScore(metric_fitted_hp)
 ```
 
 ```{r hp strong}
-#test big6 CFA
+# Strong Invariance 
  strong_fitted_hp <- cfa(configural_hp,
                group.equal = c("loadings", "intercepts"),
                data = big6,
                group = "Gender"
  )
 
-summary(strong_fitted_hp, standardized = TRUE)
+summary(strong_fitted_hp, fit.measures = TRUE, standardized = TRUE)
 
 fitmeasures(metric_fitted_hp, c("cfi", "mfi"))
 fitmeasures(strong_fitted_hp, c("cfi", "mfi"))
@@ -69,23 +68,41 @@ fitmeasures(strong_fitted_hp, c("cfi", "mfi"))
 modindices(strong_fitted_hp)
 lavTestScore(strong_fitted_hp)
 
-anova(strong_fitted_hp, metric_fitted_hp, configural_fitted_hp)
-
 ```
 
 ```{r hp strict}
+# Strict Invariance 
 strict_fitted_hp <- cfa(configural_hp,
                group.equal = c("loadings", "intercepts", "residuals"),
                data = big6,
                group = "Gender"
  )
 
-summary(strict_fitted_hp, standardized = T)
+summary(strict_fitted_hp, fit.measures = TRUE, standardized = T)
 
 fitmeasures(strong_fitted_hp, c("cfi", "mfi"))
 fitmeasures(strict_fitted_hp, c("cfi", "mfi"))
 
+modindices(strict_fitted_hp)
 lavTestScore(strict_fitted_hp)
 
-anova(strict_fitted_hp, strong_fitted_hp, metric_fitted_hp, configural_fitted_hp)
+```
+
+```{r hp partial strict}
+# Partial Strict Invariance 
+strict_fitted_p_hp <- cfa(configural_hp,
+               group.equal = c("loadings", "intercepts", "residuals"),
+               group.partial = c("use_R ~~ use_R"),
+               data = big6,
+               group = "Gender"
+ )
+
+summary(strict_fitted_p_hp, fit.measures = TRUE, standardized = T)
+
+fitmeasures(strict_fitted_hp, c("cfi", "mfi"))
+fitmeasures(strict_fitted_p_hp, c("cfi", "mfi"))
+
+modindices(strict_fitted_hp)
+lavTestScore(strict_fitted_p_hp)
+
 ```
