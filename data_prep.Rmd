@@ -7,6 +7,7 @@ output: html_document
 library(tidyverse)
 library(here)
 library(rio)
+library(psych)
 
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -113,4 +114,23 @@ save(big6, file = here("aggregated_data.Rdata"))
 
 ```
 
+```{r input data}
+
+#men correlations
+men <- big6 %>% 
+  filter(Gender == "1")
+
+cor(men[3:17])
+
+describe(men)
+
+#women corelations
+women <- big6 %>% 
+  filter(Gender == "2")
+
+cor(women[3:17])
+
+describe(women)
+
+```
 
